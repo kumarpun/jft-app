@@ -15,6 +15,16 @@ class Repository {
     return (j['token'] as String, User.fromJson(j['user']));
   }
 
+  /// Always succeeds server-side (generic response) so accounts can't be enumerated.
+  Future<String> forgotPassword(String email) async {
+    final j = await api.post('/auth/forgot-password', {'email': email});
+    return (j['message'] as String?) ?? 'If that email is registered, a reset link has been sent.';
+  }
+
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    await api.post('/auth/change-password', {'currentPassword': currentPassword, 'newPassword': newPassword});
+  }
+
   Future<User> me() async => User.fromJson((await api.get('/me'))['user']);
 
   Future<void> logout() async {

@@ -3,6 +3,7 @@ import '../state/auth_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ui.dart';
 import 'announcements_tab.dart';
+import 'change_password_screen.dart';
 import 'my_packages_tab.dart';
 import 'packages_tab.dart';
 import 'tests_tab.dart';
@@ -56,7 +57,9 @@ class _HomeShellState extends State<HomeShell> {
             icon: const Icon(Icons.account_circle_outlined, color: Colors.white, size: 28),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             onSelected: (v) async {
-              if (v == 'out') {
+              if (v == 'pw') {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => ChangePasswordScreen(auth: a)));
+              } else if (v == 'out') {
                 final ok = await showDialog<bool>(
                   context: context,
                   builder: (c) => AlertDialog(
@@ -74,6 +77,7 @@ class _HomeShellState extends State<HomeShell> {
               PopupMenuItem(enabled: false, child: Text(a.user?.name ?? '', style: const TextStyle(fontWeight: FontWeight.w700))),
               PopupMenuItem(enabled: false, child: Text(a.user?.email ?? '')),
               const PopupMenuDivider(),
+              const PopupMenuItem(value: 'pw', child: Text('Change password')),
               const PopupMenuItem(value: 'out', child: Text('Sign out')),
             ],
           ),
