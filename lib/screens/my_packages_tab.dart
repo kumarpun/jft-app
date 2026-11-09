@@ -35,17 +35,15 @@ class MyPackagesTab extends StatelessWidget {
           return SetCard(
             heading: heading(p.tests, p.name),
             extra: cats(p.tests).isEmpty ? null : Text(p.name, style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w600)),
-            topRight: Pill(label, color: fg, bg: bg),
+            topRight: Pill(label, color: fg, bg: bg, icon: active ? Icons.timer_outlined : null),
             emptyText: p.status == 'pending' ? 'Complete payment via WhatsApp; access unlocks once approved.' : '',
             rows: [
               if (active)
                 for (final t in p.tests)
                   SetRowData(
                     title: t.title,
-                    meta: t.isForm
-                        ? 'Google Form · ${formatDuration(t.durationSeconds)}'
-                        : '${t.questionCount} questions · ${formatDuration(t.durationSeconds)}',
-                    trailing: Icon(t.isForm ? Icons.open_in_new_rounded : Icons.play_circle_outline, color: AppColors.primary),
+                    meta: [if (t.folder != null) '📁 ${t.folder}', if (!t.isForm) '${t.questionCount} questions', if (t.durationSeconds > 0) formatDuration(t.durationSeconds)].join(' · '),
+                    trailing: Icon(t.isForm ? Icons.open_in_new_rounded : Icons.play_circle_outline, color: Theme.of(context).colorScheme.primary),
                     onTap: () => _open(c, t),
                   ),
             ],

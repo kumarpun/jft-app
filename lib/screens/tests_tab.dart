@@ -40,9 +40,7 @@ class TestsTab extends StatelessWidget {
               for (final t in groups[names[i]]!)
                 SetRowData(
                   title: t.title,
-                  meta: t.isForm
-                      ? 'Google Form · ${formatDuration(t.durationSeconds)}'
-                      : '${t.questionCount} questions · ${formatDuration(t.durationSeconds)}',
+                  meta: [if (t.folder != null) '📁 ${t.folder}', if (!t.isForm) '${t.questionCount} questions', if (t.durationSeconds > 0) formatDuration(t.durationSeconds)].join(' · '),
                   trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                     if (t.bestPercent != null) ...[
                       Pill('Best ${t.bestPercent}%', color: percentColor(t.bestPercent!), bg: t.bestPercent! >= 50 ? context.pal.okSoft : context.pal.dangerSoft),
@@ -223,7 +221,7 @@ class TestCard extends StatelessWidget {
               ]),
             ]),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+          Icon(Icons.chevron_right_rounded, color: Theme.of(context).colorScheme.primary),
         ]),
       );
 }

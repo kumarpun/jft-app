@@ -67,8 +67,8 @@ class _SetCardState extends State<SetCard> {
                 Container(
                   width: 30,
                   height: 30,
-                  decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.primary, width: 2)),
-                  child: Icon(_open ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, size: 20, color: AppColors.primary),
+                  decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2)),
+                  child: Icon(_open ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, size: 20, color: Theme.of(context).colorScheme.primary),
                 ),
               ]),
             ),
@@ -101,7 +101,7 @@ class _SetCardState extends State<SetCard> {
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text.rich(TextSpan(children: [
                       TextSpan(text: '${(i + 1).toString().padLeft(2, '0')} ', style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w500)),
-                      TextSpan(text: r.title, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800)),
+                      TextSpan(text: r.title, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w800)),
                     ]), style: const TextStyle(fontSize: 16)),
                     if (r.meta.isNotEmpty) ...[
                       const SizedBox(height: 3),

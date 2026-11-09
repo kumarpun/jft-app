@@ -31,7 +31,10 @@ class AnnouncementsTab extends StatelessWidget {
                 NetImage(api: auth.api, url: a.imageUrl),
                 Row(children: [
                   Expanded(child: Text(a.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
-                  Pill(a.featured ? 'Featured' : timeLeft(a.secondsLeft)),
+                  if (a.featured)
+                    const Pill('★ Featured', color: Colors.white, bg: Color(0xFF3D6BEA))
+                  else
+                    Pill(timeLeft(a.secondsLeft), icon: Icons.timer_outlined),
                 ]),
                 if (a.body.isNotEmpty) ...[const SizedBox(height: 8), Text(a.body)],
               ]),

@@ -26,7 +26,7 @@ class PackagesTab extends StatelessWidget {
                 SizedBox(width: 78, child: Text(label, style: TextStyle(color: pal.muted, fontSize: 13.5, fontWeight: FontWeight.w600))),
                 Expanded(
                   child: Text(value,
-                      style: TextStyle(color: strong ? AppColors.primary : pal.text, fontSize: strong ? 17 : 14.5, fontWeight: strong ? FontWeight.w900 : FontWeight.w700)),
+                      style: TextStyle(color: strong ? Theme.of(d).colorScheme.primary : pal.text, fontSize: strong ? 17 : 14.5, fontWeight: strong ? FontWeight.w900 : FontWeight.w700)),
                 ),
               ]),
             );
@@ -79,7 +79,7 @@ class PackagesTab extends StatelessWidget {
     );
     if (ok != true || !c.mounted) return;
     try {
-      final r = await auth.repo.requestPackage(p.id);
+      final r = await auth.repo.requestPackage(p.id, category: p.category);
       if (!c.mounted) return;
       if (r.whatsappUrl != null) await openUrl(c, r.whatsappUrl!);
       if (c.mounted) toast(c, r.status == 'active' ? 'Package activated' : 'Request sent. Finish payment on WhatsApp.');
@@ -127,16 +127,19 @@ class PackagesTab extends StatelessWidget {
                 child: Text(status == null ? 'Buy Now' : (status == 'active' ? 'Active' : 'Requested')),
               ),
             ]),
-            extra: Text(names.isEmpty ? '${p.days} days' : '${p.name} · ${p.days} days',
-                style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w600, fontSize: 13)),
+            extra: Row(mainAxisSize: MainAxisSize.min, children: [
+              if (names.isNotEmpty)
+                Text('${p.name} · ', style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w600, fontSize: 13)),
+              Icon(Icons.timer_outlined, size: 15, color: context.pal.muted),
+              const SizedBox(width: 4),
+              Text('${p.days} days remaining', style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w600, fontSize: 13)),
+            ]),
             rows: [
               for (final t in p.tests)
                 SetRowData(
                   title: t.title,
-                  meta: t.isForm
-                      ? 'Google Form · ${formatDuration(t.durationSeconds)}'
-                      : '${t.questionCount} questions · ${formatDuration(t.durationSeconds)}',
-                  trailing: Pill('Paid', color: context.pal.muted, bg: context.pal.surface),
+                  meta: [if (t.folder != null) '📁 ${t.folder}', if (!t.isForm) '${t.questionCount} questions', if (t.durationSeconds > 0) formatDuration(t.durationSeconds)].join(' · '),
+                  trailing: Pill('🔒 Premium'),
                 ),
             ],
           );

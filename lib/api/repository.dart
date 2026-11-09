@@ -65,8 +65,10 @@ class Repository {
   Future<List<Purchase>> myPackages() async =>
       [for (final p in (await api.get('/my-packages'))['purchases']) Purchase.fromJson(p)];
 
-  Future<PurchaseRequest> requestPackage(int id) async {
-    final j = await api.post('/packages/$id/request');
+  Future<PurchaseRequest> requestPackage(int id, {String? category}) async {
+    final j = category != null
+        ? await api.post('/packages/category/request', {'category': category})
+        : await api.post('/packages/$id/request');
     return PurchaseRequest(j['status'], j['whatsappUrl']);
   }
 

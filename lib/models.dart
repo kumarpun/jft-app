@@ -9,7 +9,7 @@ class User {
 class TestSummary {
   final int id, durationSeconds, questionCount;
   final String title, description, category;
-  final String? formUrl;
+  final String? formUrl, folder;
   final int? bestPercent;
   bool get isForm => formUrl != null && formUrl!.isNotEmpty && questionCount == 0;
   TestSummary.fromJson(Map<String, dynamic> j)
@@ -17,6 +17,7 @@ class TestSummary {
         title = j['title'] ?? '',
         description = j['description'] ?? '',
         category = j['category'] ?? '',
+        folder = j['folder'],
         durationSeconds = j['durationSeconds'] ?? 0,
         formUrl = j['formUrl'],
         questionCount = j['questionCount'] ?? 0,
@@ -40,13 +41,14 @@ class Announcement {
 class PackageTest {
   final int id;
   final String title;
-  final String? category;
+  final String? category, folder;
   final String? formUrl; // set (with no questions) => a Google Form to open instead of a test
   final int questionCount, durationSeconds;
   PackageTest.fromJson(Map<String, dynamic> j)
       : id = j['id'],
         title = j['title'] ?? '',
         category = j['category'],
+        folder = j['folder'],
         formUrl = j['formUrl'],
         questionCount = j['questionCount'] ?? 0,
         durationSeconds = j['durationSeconds'] ?? 0;
@@ -60,6 +62,8 @@ class Package {
   final double? originalPrice;
   final List<PackageTest> tests;
   final String? myStatus; // pending | active | null
+  /// Set for a grouped paid category: buying it requests a category-wide package.
+  final String? category;
   /// Whole categories sold in this package: (sub-category name, set count).
   final List<(String, int)> categories;
   /// Sub-category names of individually added sets (card heading).
@@ -73,6 +77,7 @@ class Package {
         originalPrice = j['originalPrice']?.toDouble(),
         tests = [for (final t in j['tests'] ?? []) PackageTest.fromJson(t)],
         myStatus = j['myStatus'],
+        category = j['category'],
         setCategories = [for (final c in j['setCategories'] ?? []) c.toString()],
         categories = [for (final c in j['categories'] ?? []) (c['name'] as String, (c['sets'] as num).toInt())];
 }

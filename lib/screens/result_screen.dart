@@ -147,7 +147,7 @@ class _AnswerCard extends StatelessWidget {
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(color: context.pal.primarySoft, shape: BoxShape.circle),
-            child: Text('$n', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 14)),
+            child: Text('$n', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700, fontSize: 14)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -171,7 +171,7 @@ class _AnswerCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: context.pal.surface2,
-              border: Border(left: BorderSide(color: AppColors.primary, width: 3)),
+              border: Border(left: BorderSide(color: Theme.of(context).colorScheme.primary, width: 3)),
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             child: Text.rich(TextSpan(children: [

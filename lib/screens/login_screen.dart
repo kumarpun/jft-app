@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(color: context.pal.primarySoft, borderRadius: BorderRadius.circular(12)),
-                          child: Text(widget.auth.notice!, style: const TextStyle(color: AppColors.primary)),
+                          child: Text(widget.auth.notice!, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                         ),
                       ],
                       const SizedBox(height: 22),

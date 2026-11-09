@@ -18,14 +18,18 @@ Future<void> openVideo(BuildContext c, String id) => openUrl(c, 'https://www.you
 
 class Pill extends StatelessWidget {
   final String text;
-  final Color color;
+  final Color? color; // defaults to the theme's readable primary (navy in light, sky blue in dark)
   final Color? bg; // defaults to the theme's soft primary tint
-  const Pill(this.text, {super.key, this.color = AppColors.primary, this.bg});
+  final IconData? icon;
+  const Pill(this.text, {super.key, this.color, this.bg, this.icon});
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
         decoration: BoxDecoration(color: bg ?? context.pal.primarySoft, borderRadius: BorderRadius.circular(20)),
-        child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .2)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          if (icon != null) ...[Icon(icon, size: 14, color: color ?? Theme.of(context).colorScheme.primary), const SizedBox(width: 4)],
+          Text(text, style: TextStyle(color: color ?? Theme.of(context).colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .2)),
+        ]),
       );
 }
 

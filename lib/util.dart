@@ -14,9 +14,9 @@ String clock(int seconds) {
 
 String timeLeft(int seconds) {
   final d = seconds ~/ 86400, h = (seconds % 86400) ~/ 3600, m = (seconds % 3600) ~/ 60;
-  if (d > 0) return '${d}d ${h}h left';
-  if (h > 0) return '${h}h ${m}m left';
-  return '${m}m left';
+  if (d > 0) return '${d}d ${h}h remaining';
+  if (h > 0) return '${h}h ${m}m remaining';
+  return '${m}m remaining';
 }
 
 String formatPrice(double v) => v == v.roundToDouble() ? '${v.toInt()}' : v.toStringAsFixed(2);
