@@ -1,22 +1,83 @@
 import 'package:flutter/material.dart';
 
+
+/// Theme-sensitive colours. Read with `context.pal`.
+@immutable
+class Pal extends ThemeExtension<Pal> {
+  final Color bg, surface, surface2, text, muted, border, primarySoft, dangerSoft, okSoft, ink;
+  const Pal({
+    required this.bg,
+    required this.surface,
+    required this.surface2,
+    required this.text,
+    required this.muted,
+    required this.border,
+    required this.primarySoft,
+    required this.dangerSoft,
+    required this.okSoft,
+    required this.ink,
+  });
+
+  static const light = Pal(
+    bg: Color(0xFFF2F5FA), // cool mist
+    surface: Colors.white,
+    surface2: Color(0xFFEAF0FA),
+    text: Color(0xFF0B1B3F),
+    muted: Color(0xFF6B7A99),
+    border: Color(0xFFE1E8F4),
+    primarySoft: Color(0xFFE3ECFB), // pale blue
+    dangerSoft: Color(0xFFFEF2F2),
+    okSoft: Color(0xFFECFDF3),
+    ink: Color(0xFF0B1B3F),
+  );
+
+  static const dark = Pal(
+    bg: Color(0xFF08122A),
+    surface: Color(0xFF101D3B),
+    surface2: Color(0xFF182850),
+    text: Color(0xFFF1F5FF),
+    muted: Color(0xFF9AA9C7),
+    border: Color(0xFF22335C),
+    primarySoft: Color(0xFF1B2E5A),
+    dangerSoft: Color(0xFF3B1517),
+    okSoft: Color(0xFF10301D),
+    ink: Color(0xFF22335C),
+  );
+
+  @override
+  Pal copyWith() => this;
+
+  @override
+  Pal lerp(ThemeExtension<Pal>? other, double t) {
+    if (other is! Pal) return this;
+    Color l(Color a, Color b) => Color.lerp(a, b, t)!;
+    return Pal(
+      bg: l(bg, other.bg),
+      surface: l(surface, other.surface),
+      surface2: l(surface2, other.surface2),
+      text: l(text, other.text),
+      muted: l(muted, other.muted),
+      border: l(border, other.border),
+      primarySoft: l(primarySoft, other.primarySoft),
+      dangerSoft: l(dangerSoft, other.dangerSoft),
+      okSoft: l(okSoft, other.okSoft),
+      ink: l(ink, other.ink),
+    );
+  }
+}
+
+extension PalContext on BuildContext {
+  Pal get pal => Theme.of(this).extension<Pal>() ?? Pal.light;
+}
+
 class AppColors {
-  static const primary = Color(0xFFC80815); // venetian red
-  static const primaryDark = Color(0xFF8A050F); // deep venetian red
-  static const primaryLight = Color(0xFFE5303C);
-  static const primarySoft = Color(0xFFFDEBEC); // rose tint
-  static const gold = Color(0xFFC9A24B); // champagne gold accent
-  static const goldSoft = Color(0xFFF7EDD2);
+  static const primary = Color(0xFF0F2A5C); // deep navy
+  static const primaryDark = Color(0xFF081A3E); // midnight navy
+  static const primaryLight = Color(0xFF3B66C4);
+  static const accent = Color(0xFF7FA8F0); // sky blue accent
   static const danger = Color(0xFFDC2626);
-  static const dangerSoft = Color(0xFFFEF2F2);
   static const ok = Color(0xFF15803D);
-  static const okSoft = Color(0xFFECFDF3);
   static const warn = Color(0xFFB45309);
-  static const muted = Color(0xFF7B6F73);
-  static const border = Color(0xFFEFE3E4);
-  static const bg = Color(0xFFFBF8F7); // warm ivory
-  static const text = Color(0xFF1C1214);
-  static const ink = Color(0xFF14090B);
 
   static const brandGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -24,16 +85,16 @@ class AppColors {
     colors: [primaryLight, primary, primaryDark],
   );
 
-  static const goldGradient = LinearGradient(
+  static const accentGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFE6C875), gold, Color(0xFFA8812F)],
+    colors: [Color(0xFFB5CEF7), accent, Color(0xFF4F7FD8)],
   );
 
   static const heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFE5303C), primary, Color(0xFF6E040C)],
+    colors: [Color(0xFF1E3F85), primary, Color(0xFF081A3E)],
     stops: [0, .5, 1],
   );
 
@@ -47,48 +108,62 @@ class AppColors {
   ];
 }
 
-ThemeData buildTheme() {
+ThemeData buildTheme([Brightness brightness = Brightness.light]) {
+  final dark = brightness == Brightness.dark;
+  final p = dark ? Pal.dark : Pal.light;
+  // Brand navy is too dark to read as text/outline on the dark surface.
+  final accent = dark ? const Color(0xFF7FA6FF) : AppColors.primary;
+  final action = dark ? const Color(0xFF3D6BEA) : AppColors.primary; // filled buttons / selected nav
   final scheme = ColorScheme.fromSeed(
     seedColor: AppColors.primary,
-    primary: AppColors.primary,
-    secondary: AppColors.gold,
-    surface: Colors.white,
+    brightness: brightness,
+    primary: accent,
+    secondary: AppColors.accent,
+    surface: p.surface,
+    onSurface: p.text,
   );
   OutlineInputBorder ob(Color c, [double w = 1]) =>
       OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: c, width: w));
   return ThemeData(
     useMaterial3: true,
+    brightness: brightness,
     colorScheme: scheme,
-    scaffoldBackgroundColor: AppColors.bg,
+    extensions: [p],
+    scaffoldBackgroundColor: p.bg,
+    // Default Android zoom transition flashes the light scaffold between routes; slide keeps both pages opaque.
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    }),
     splashFactory: InkSparkle.splashFactory,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.bg,
-      foregroundColor: AppColors.text,
+    appBarTheme: AppBarTheme(
+      backgroundColor: p.bg,
+      foregroundColor: p.text,
       elevation: 0,
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
-      titleTextStyle: TextStyle(color: AppColors.text, fontSize: 19, fontWeight: FontWeight.w800, letterSpacing: .2),
+      titleTextStyle: TextStyle(color: p.text, fontSize: 19, fontWeight: FontWeight.w800, letterSpacing: .2),
     ),
     cardTheme: CardThemeData(
-      color: Colors.white,
+      color: p.surface,
       elevation: 0,
       margin: EdgeInsets.zero,
       surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.border)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: p.border)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: p.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: ob(AppColors.border),
-      enabledBorder: ob(AppColors.border),
-      focusedBorder: ob(AppColors.primary, 1.6),
-      labelStyle: const TextStyle(color: AppColors.muted),
-      floatingLabelStyle: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+      border: ob(p.border),
+      enabledBorder: ob(p.border),
+      focusedBorder: ob(accent, 1.6),
+      labelStyle: TextStyle(color: p.muted),
+      floatingLabelStyle: TextStyle(color: accent, fontWeight: FontWeight.w600),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: action,
         foregroundColor: Colors.white,
         minimumSize: const Size.fromHeight(52),
         textStyle: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, letterSpacing: .3),
@@ -97,32 +172,34 @@ ThemeData buildTheme() {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.primary),
+        foregroundColor: accent,
+        side: BorderSide(color: accent),
         minimumSize: const Size(0, 46),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     ),
-    textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: AppColors.primary)),
-    progressIndicatorTheme: const ProgressIndicatorThemeData(color: AppColors.primary),
+    textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: accent)),
+    progressIndicatorTheme: ProgressIndicatorThemeData(color: accent),
     dialogTheme: DialogThemeData(
-      backgroundColor: Colors.white,
+      backgroundColor: p.surface,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
     ),
+    popupMenuTheme: PopupMenuThemeData(color: p.surface, surfaceTintColor: Colors.transparent),
     snackBarTheme: SnackBarThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: Colors.white,
+      backgroundColor: p.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       height: 68,
-      indicatorColor: AppColors.primarySoft,
+      indicatorColor: action,
+      indicatorShape: const StadiumBorder(),
       iconTheme: WidgetStateProperty.resolveWith((s) =>
-          IconThemeData(color: s.contains(WidgetState.selected) ? AppColors.primary : AppColors.muted, size: 24)),
+          IconThemeData(color: s.contains(WidgetState.selected) ? Colors.white : p.muted, size: 24)),
       labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
             fontSize: 11.5,
             fontWeight: s.contains(WidgetState.selected) ? FontWeight.w800 : FontWeight.w500,
-            color: s.contains(WidgetState.selected) ? AppColors.primary : AppColors.muted,
+            color: s.contains(WidgetState.selected) ? p.text : p.muted,
           )),
     ),
   );
@@ -137,9 +214,9 @@ class LuxCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.pal.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.pal.border),
           boxShadow: AppColors.softShadow,
         ),
         child: Material(

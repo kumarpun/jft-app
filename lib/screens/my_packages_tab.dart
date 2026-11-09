@@ -27,14 +27,14 @@ class MyPackagesTab extends StatelessWidget {
         itemBuilder: (c, i) {
           final p = list[i];
           final (label, fg, bg) = switch (p.status) {
-            'active' => (timeLeft(p.secondsLeft ?? 0), AppColors.ok, AppColors.okSoft),
+            'active' => (timeLeft(p.secondsLeft ?? 0), AppColors.ok, context.pal.okSoft),
             'pending' => ('Pending approval', AppColors.warn, const Color(0xFFFFFBEB)),
-            _ => ('Expired', AppColors.danger, AppColors.dangerSoft),
+            _ => ('Expired', AppColors.danger, context.pal.dangerSoft),
           };
           final active = p.status == 'active';
           return SetCard(
             heading: heading(p.tests, p.name),
-            extra: cats(p.tests).isEmpty ? null : Text(p.name, style: const TextStyle(color: AppColors.muted, fontWeight: FontWeight.w600)),
+            extra: cats(p.tests).isEmpty ? null : Text(p.name, style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w600)),
             topRight: Pill(label, color: fg, bg: bg),
             emptyText: p.status == 'pending' ? 'Complete payment via WhatsApp; access unlocks once approved.' : '',
             rows: [

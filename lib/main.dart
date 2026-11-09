@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'screens/home_shell.dart';
 import 'screens/login_screen.dart';
 import 'state/auth_controller.dart';
+import 'state/theme_controller.dart';
 import 'theme/app_theme.dart';
 import 'widgets/ui.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  themeController.init();
   runApp(const JftSenseiApp());
 }
 
@@ -21,10 +23,14 @@ class _JftSenseiAppState extends State<JftSenseiApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ListenableBuilder(
+      listenable: themeController,
+      builder: (context, _) => MaterialApp(
       title: 'JFT Sensei',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(),
+      theme: buildTheme(Brightness.light),
+      darkTheme: buildTheme(Brightness.dark),
+      themeMode: themeController.mode,
       home: ListenableBuilder(
         listenable: _auth,
         builder: (context, _) {
@@ -34,6 +40,6 @@ class _JftSenseiAppState extends State<JftSenseiApp> {
           return _auth.user == null ? LoginScreen(auth: _auth) : HomeShell(key: ValueKey(_auth.user!.id), auth: _auth);
         },
       ),
-    );
+    ));
   }
 }

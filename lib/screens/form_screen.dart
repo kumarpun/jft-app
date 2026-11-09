@@ -100,7 +100,7 @@ class _FormScreenState extends State<FormScreen> {
                 ),
                 Text(clock(_countUp ? _elapsed : (_left < 0 ? 0 : _left)),
                     style: TextStyle(
-                        color: !_countUp && _left <= 60 ? AppColors.gold : Colors.white, fontSize: 17, fontWeight: FontWeight.w800)),
+                        color: !_countUp && _left <= 60 ? AppColors.accent : Colors.white, fontSize: 17, fontWeight: FontWeight.w800)),
                 IconButton(icon: const Icon(Icons.refresh, color: Colors.white), tooltip: 'Reload', onPressed: _reload),
               ]),
             ),
@@ -111,9 +111,9 @@ class _FormScreenState extends State<FormScreen> {
           child: _error != null
               ? Center(
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.cloud_off, size: 48, color: AppColors.muted),
+                    Icon(Icons.cloud_off, size: 48, color: context.pal.muted),
                     const SizedBox(height: 12),
-                    Text(_error!, style: const TextStyle(color: AppColors.muted)),
+                    Text(_error!, style: TextStyle(color: context.pal.muted)),
                     const SizedBox(height: 16),
                     OutlinedButton(onPressed: _reload, child: const Text('Retry')),
                   ]),

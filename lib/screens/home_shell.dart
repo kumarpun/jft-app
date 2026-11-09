@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../state/auth_controller.dart';
+import '../state/theme_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ui.dart';
 import 'announcements_tab.dart';
@@ -26,7 +27,7 @@ class _HomeShellState extends State<HomeShell> {
     final a = widget.auth;
     final tabs = <(String, IconData, Widget)>[
       ('Free sets', Icons.quiz_outlined, TestsTab(key: ValueKey('t$_gen'), auth: a, onChanged: _refreshAll)),
-      ('My packages', Icons.inventory_2_outlined, MyPackagesTab(key: ValueKey('m$_gen'), auth: a, onChanged: _refreshAll)),
+      ('Library', Icons.local_library_outlined, MyPackagesTab(key: ValueKey('m$_gen'), auth: a, onChanged: _refreshAll)),
       ('Packages', Icons.storefront_outlined, PackagesTab(key: ValueKey('p$_gen'), auth: a, onChanged: _refreshAll)),
       ('News', Icons.campaign_outlined, AnnouncementsTab(key: ValueKey('n$_gen'), auth: a)),
     ];
@@ -57,7 +58,10 @@ class _HomeShellState extends State<HomeShell> {
             icon: const Icon(Icons.account_circle_outlined, color: Colors.white, size: 28),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             onSelected: (v) async {
-              if (v == 'pw') {
+              if (v == 'theme') {
+                final dark = Theme.of(context).brightness == Brightness.dark;
+                themeController.set(dark ? ThemeMode.light : ThemeMode.dark);
+              } else if (v == 'pw') {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => ChangePasswordScreen(auth: a)));
               } else if (v == 'out') {
                 final ok = await showDialog<bool>(
@@ -73,32 +77,81 @@ class _HomeShellState extends State<HomeShell> {
                 if (ok == true) a.logout();
               }
             },
-            itemBuilder: (_) => [
-              PopupMenuItem(enabled: false, child: Text(a.user?.name ?? '', style: const TextStyle(fontWeight: FontWeight.w700))),
-              PopupMenuItem(enabled: false, child: Text(a.user?.email ?? '')),
-              const PopupMenuDivider(),
-              const PopupMenuItem(value: 'pw', child: Text('Change password')),
-              const PopupMenuItem(value: 'out', child: Text('Sign out')),
-            ],
+            itemBuilder: (ctx) {
+              final pal = ctx.pal;
+              final name = a.user?.name ?? '';
+              final isDark = Theme.of(ctx).brightness == Brightness.dark;
+              PopupMenuItem<String> item(String value, IconData icon, String label, {Color? color, Widget? trailing}) =>
+                  PopupMenuItem(
+                    value: value,
+                    child: Row(children: [
+                      Icon(icon, size: 21, color: color ?? pal.muted),
+                      const SizedBox(width: 14),
+                      Expanded(child: Text(label, style: TextStyle(color: color ?? pal.text, fontWeight: FontWeight.w600))),
+                      ?trailing,
+                    ]),
+                  );
+              return [
+                PopupMenuItem(
+                  enabled: false,
+                  child: Row(children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: pal.primarySoft,
+                      child: Text(name.isEmpty ? '?' : name[0].toUpperCase(),
+                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 17)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                        Text(name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: pal.text, fontWeight: FontWeight.w800, fontSize: 15)),
+                        Text(a.user?.email ?? '', maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: pal.muted, fontSize: 12.5)),
+                      ]),
+                    ),
+                  ]),
+                ),
+                const PopupMenuDivider(),
+                item(
+                  'theme',
+                  isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                  'Dark mode',
+                  trailing: IgnorePointer(child: Switch(value: isDark, onChanged: (_) {})),
+                ),
+                item('pw', Icons.lock_outline_rounded, 'Change password'),
+                const PopupMenuDivider(),
+                item('out', Icons.logout_rounded, 'Sign out', color: AppColors.danger),
+              ];
+            },
           ),
         ],
       ),
       body: IndexedStack(index: _i, children: [for (final t in tabs) t.$3]),
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          border: Border(top: BorderSide(color: AppColors.primary.withValues(alpha: .18), width: 1.2)),
-          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: .16), blurRadius: 28, offset: const Offset(0, -8))],
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.pal.surface,
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: .18), blurRadius: 24, offset: const Offset(0, 8))],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: NavigationBar(
+                height: 68,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                selectedIndex: _i,
+                onDestinationSelected: (i) => setState(() => _i = i),
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                destinations: [for (final t in tabs) NavigationDestination(icon: Icon(t.$2), label: t.$1.split(' ').first)],
+              ),
+            ),
+          ),
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: NavigationBar(
-        selectedIndex: _i,
-        onDestinationSelected: (i) => setState(() => _i = i),
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: [for (final t in tabs) NavigationDestination(icon: Icon(t.$2), label: t.$1.split(' ').first)],
-      ))),
+      ),
     );
   }
 

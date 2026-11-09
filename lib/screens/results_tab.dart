@@ -31,7 +31,7 @@ class ResultsTab extends StatelessWidget {
               subtitle: Text('${formatDate(r.submittedAt)}${r.timedOut ? ' · timed out' : ''}'),
               trailing: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
                 Text('${r.percent}%', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: percentColor(r.percent))),
-                Text('${r.score}/${r.total}', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+                Text('${r.score}/${r.total}', style: TextStyle(color: context.pal.muted, fontSize: 12)),
               ]),
               onTap: () => Navigator.push(c, MaterialPageRoute(builder: (_) => ResultScreen(auth: auth, id: r.id))),
             ),

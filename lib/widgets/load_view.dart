@@ -17,7 +17,9 @@ class _LoadViewState<T> extends State<LoadView<T>> {
 
   Future<void> _refresh() async {
     final f = widget.load();
-    setState(() => _f = f);
+    setState(() {
+      _f = f;
+    });
     try {
       await f;
     } catch (_) {}
@@ -34,11 +36,11 @@ class _LoadViewState<T> extends State<LoadView<T>> {
             onRefresh: _refresh,
             child: ListView(children: [
               const SizedBox(height: 120),
-              const Icon(Icons.cloud_off, size: 48, color: AppColors.muted),
+              Icon(Icons.cloud_off, size: 48, color: context.pal.muted),
               const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text('${snap.error}', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.muted)),
+                child: Text('${snap.error}', textAlign: TextAlign.center, style: TextStyle(color: context.pal.muted)),
               ),
               const SizedBox(height: 16),
               Center(child: OutlinedButton(onPressed: _refresh, child: const Text('Retry'))),
@@ -51,7 +53,7 @@ class _LoadViewState<T> extends State<LoadView<T>> {
             onRefresh: _refresh,
             child: ListView(children: [
               const SizedBox(height: 140),
-              Center(child: Text(widget.emptyText, style: const TextStyle(color: AppColors.muted))),
+              Center(child: Text(widget.emptyText, style: TextStyle(color: context.pal.muted))),
             ]),
           );
         }

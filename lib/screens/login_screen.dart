@@ -45,19 +45,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
                   const SizedBox(height: 6),
-                  Text('Master JFT-Basic with confidence',
+                  Text('Master JFT with confidence',
                       textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withValues(alpha: .8), letterSpacing: .3)),
                   const SizedBox(height: 28),
                   FadeSlide(child: AuthCard(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                      const Text('Welcome back', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.text)),
+                      Text('Welcome', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.pal.text)),
                       const SizedBox(height: 4),
-                      const Text('Sign in to continue', style: TextStyle(color: AppColors.muted)),
+                      Text('Sign in to continue', textAlign: TextAlign.center, style: TextStyle(color: context.pal.muted)),
                       if (widget.auth.notice != null) ...[
                         const SizedBox(height: 14),
                         Container(
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(12)),
+                          decoration: BoxDecoration(color: context.pal.primarySoft, borderRadius: BorderRadius.circular(12)),
                           child: Text(widget.auth.notice!, style: const TextStyle(color: AppColors.primary)),
                         ),
                       ],

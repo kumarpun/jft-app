@@ -8,9 +8,9 @@ import '../widgets/ui.dart';
 import 'result_screen.dart';
 
 // Colours taken from the web exam UI (.exam in globals.css).
-const _examGreen = Color(0xFFA4161A);
-const _examGreenDark = Color(0xFF6B0F1A);
-const _examBlue = Color(0xFFFCE9EA);
+const _examGreen = Color(0xFF0F2A5C);
+const _examGreenDark = Color(0xFF081A3E);
+const _examBlue = Color(0xFFE3ECFB);
 const _examGrey = Color(0xFF9CA3AF);
 const _sectionSize = 12;
 
@@ -171,7 +171,7 @@ class _TakeTestScreenState extends State<TakeTestScreen> {
         _leave();
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: context.pal.surface,
         body: Stack(children: [
           Column(children: [
             // Black top bar: question / section, clock, finish button.
@@ -228,8 +228,8 @@ class _TakeTestScreenState extends State<TakeTestScreen> {
                   ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: const Color(0xFFE6C875),
-                    foregroundColor: const Color(0xFF222222),
+                    backgroundColor: const Color(0xFFB5CEF7),
+                    foregroundColor: const Color(0xFF0B1B3F),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -262,7 +262,7 @@ class _TakeTestScreenState extends State<TakeTestScreen> {
             // Question number strip.
             Container(
               height: 48,
-              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.border))),
+              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: context.pal.border))),
               child: ListView.builder(
                 controller: _strip,
                 scrollDirection: Axis.horizontal,
@@ -323,13 +323,13 @@ class _TakeTestScreenState extends State<TakeTestScreen> {
             ),
             // Sticky actions.
             Container(
-              decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.border))),
+              decoration: BoxDecoration(color: context.pal.surface, border: Border(top: BorderSide(color: context.pal.border))),
               padding: EdgeInsets.fromLTRB(12, 8, 12, MediaQuery.of(context).padding.bottom + 10),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text('${_answers.length}/${p.questions.length} answered',
-                      style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+                      style: TextStyle(fontSize: 12, color: context.pal.muted)),
                 ),
                 const SizedBox(height: 6),
                 Row(children: [
@@ -363,20 +363,20 @@ class _TakeTestScreenState extends State<TakeTestScreen> {
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 420),
                   padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: context.pal.surface, borderRadius: BorderRadius.circular(16)),
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    const CircleAvatar(radius: 28, backgroundColor: AppColors.dangerSoft, child: Text('⏱', style: TextStyle(fontSize: 26))),
+                    CircleAvatar(radius: 28, backgroundColor: context.pal.dangerSoft, child: Text('⏱', style: TextStyle(fontSize: 26))),
                     const SizedBox(height: 12),
                     const Text('Time limit exceeded', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
-                    const Text.rich(
+                    Text.rich(
                       TextSpan(children: [
                         TextSpan(text: 'You needed to complete the test within the time limit. Your attempt will be submitted as '),
                         TextSpan(text: 'incomplete', style: TextStyle(fontWeight: FontWeight.w700)),
                         TextSpan(text: ', and unanswered questions will be marked as not answered.'),
                       ]),
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.muted),
+                      style: TextStyle(color: context.pal.muted),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
@@ -439,15 +439,15 @@ class _ExamOption extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: selected ? _examBlue : Colors.white,
-            border: Border.all(color: selected ? _examGreen : AppColors.text, width: 2),
+            color: selected ? context.pal.primarySoft : context.pal.surface,
+            border: Border.all(color: selected ? _examGreen : context.pal.text, width: 2),
           ),
           child: Text.rich(
             TextSpan(children: [
               TextSpan(text: '$letter. ', style: const TextStyle(fontWeight: FontWeight.w700)),
               TextSpan(text: text),
             ]),
-            style: const TextStyle(fontSize: 17, height: 1.35, color: AppColors.text),
+            style: TextStyle(fontSize: 17, height: 1.35, color: context.pal.text),
           ),
         ),
       );

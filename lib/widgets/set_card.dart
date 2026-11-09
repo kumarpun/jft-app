@@ -30,7 +30,7 @@ class _SetCardState extends State<SetCard> {
     final n = widget.rows.length;
     return FadeSlide(child: Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Colors.white, AppColors.primarySoft]),
+        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [context.pal.surface, context.pal.primarySoft]),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.primary.withValues(alpha: .30), width: 1.2),
         boxShadow: [
@@ -50,9 +50,9 @@ class _SetCardState extends State<SetCard> {
           if (widget.topRight != null) widget.topRight!,
         ]),
         const SizedBox(height: 12),
-        Container(width: 30, height: 3, decoration: BoxDecoration(gradient: AppColors.goldGradient, borderRadius: BorderRadius.circular(3))),
+        Container(width: 30, height: 3, decoration: BoxDecoration(gradient: AppColors.accentGradient, borderRadius: BorderRadius.circular(3))),
         const SizedBox(height: 8),
-        Text(widget.heading, style: TextStyle(fontSize: widget.headingSize, fontWeight: FontWeight.w800, letterSpacing: -.3, color: AppColors.text)),
+        Text(widget.heading, style: TextStyle(fontSize: widget.headingSize, fontWeight: FontWeight.w800, letterSpacing: -.3, color: context.pal.text)),
         if (widget.extra != null) ...[const SizedBox(height: 6), widget.extra!],
         if (n > 0) ...[
           const SizedBox(height: 8),
@@ -62,7 +62,7 @@ class _SetCardState extends State<SetCard> {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Text(_open ? 'Hide sets' : 'View sets', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text)),
+                Text(_open ? 'Hide sets' : 'View sets', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: context.pal.text)),
                 const SizedBox(width: 10),
                 Container(
                   width: 30,
@@ -75,7 +75,7 @@ class _SetCardState extends State<SetCard> {
           ),
         ] else if (widget.emptyText.isNotEmpty) ...[
           const SizedBox(height: 6),
-          Text(widget.emptyText, style: const TextStyle(color: AppColors.muted)),
+          Text(widget.emptyText, style: TextStyle(color: context.pal.muted)),
         ],
         if (_open) ...[
           const SizedBox(height: 8),
@@ -89,7 +89,7 @@ class _SetCardState extends State<SetCard> {
   Widget _row(int i, SetRowData r) => Padding(
         padding: const EdgeInsets.only(top: 8),
         child: Material(
-          color: Colors.white,
+          color: context.pal.surface,
           borderRadius: BorderRadius.circular(16),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
@@ -100,12 +100,12 @@ class _SetCardState extends State<SetCard> {
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text.rich(TextSpan(children: [
-                      TextSpan(text: '${(i + 1).toString().padLeft(2, '0')} ', style: const TextStyle(color: AppColors.muted, fontWeight: FontWeight.w500)),
+                      TextSpan(text: '${(i + 1).toString().padLeft(2, '0')} ', style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w500)),
                       TextSpan(text: r.title, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800)),
                     ]), style: const TextStyle(fontSize: 16)),
                     if (r.meta.isNotEmpty) ...[
                       const SizedBox(height: 3),
-                      Text(r.meta, style: const TextStyle(color: AppColors.muted, fontSize: 13)),
+                      Text(r.meta, style: TextStyle(color: context.pal.muted, fontSize: 13)),
                     ],
                   ]),
                 ),

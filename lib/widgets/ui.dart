@@ -6,7 +6,7 @@ void toast(BuildContext c, String msg, {bool error = false}) {
   ScaffoldMessenger.of(c)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(
-        content: Text(msg), backgroundColor: error ? AppColors.primaryDark : AppColors.ink, behavior: SnackBarBehavior.floating));
+        content: Text(msg), backgroundColor: error ? AppColors.primaryDark : c.pal.ink, behavior: SnackBarBehavior.floating));
 }
 
 Future<void> openUrl(BuildContext c, String url) async {
@@ -18,12 +18,13 @@ Future<void> openVideo(BuildContext c, String id) => openUrl(c, 'https://www.you
 
 class Pill extends StatelessWidget {
   final String text;
-  final Color color, bg;
-  const Pill(this.text, {super.key, this.color = AppColors.primary, this.bg = AppColors.primarySoft});
+  final Color color;
+  final Color? bg; // defaults to the theme's soft primary tint
+  const Pill(this.text, {super.key, this.color = AppColors.primary, this.bg});
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
-        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+        decoration: BoxDecoration(color: bg ?? context.pal.primarySoft, borderRadius: BorderRadius.circular(20)),
         child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .2)),
       );
 }
@@ -35,9 +36,9 @@ class BrandLogo extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: EdgeInsets.all(size * .035),
         decoration: BoxDecoration(
-          gradient: AppColors.goldGradient,
+          gradient: AppColors.accentGradient,
           borderRadius: BorderRadius.circular(size * .3),
-          boxShadow: [BoxShadow(color: AppColors.gold.withValues(alpha: .45), blurRadius: size * .4, spreadRadius: size * .02), BoxShadow(color: Colors.black.withValues(alpha: .25), blurRadius: size * .25, offset: Offset(0, size * .08))],
+          boxShadow: [BoxShadow(color: AppColors.accent.withValues(alpha: .45), blurRadius: size * .4, spreadRadius: size * .02), BoxShadow(color: Colors.black.withValues(alpha: .25), blurRadius: size * .25, offset: Offset(0, size * .08))],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(size * .27),
@@ -58,7 +59,7 @@ class CrimsonBackdrop extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFE5303C), AppColors.primary, Color(0xFF5A030A), Color(0xFF2A0105)],
+            colors: [Color(0xFF1E3F85), AppColors.primary, Color(0xFF081A3E), Color(0xFF040C20)],
             stops: [0, .35, .78, 1],
           ),
         ),
@@ -67,14 +68,14 @@ class CrimsonBackdrop extends StatelessWidget {
           Positioned(right: 30, top: 120, child: _dot(14, .22)),
           Positioned(left: -90, bottom: -80, child: _ring(300, .07)),
           Positioned(left: 40, bottom: 140, child: _dot(8, .25)),
-          Positioned(left: 0, right: 0, top: 0, child: Container(height: 2, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent, AppColors.gold, Colors.transparent])))),
+          Positioned(left: 0, right: 0, top: 0, child: Container(height: 2, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent, AppColors.accent, Colors.transparent])))),
           child,
         ]),
       );
   static Widget _ring(double d, double a) => Container(
       width: d, height: d, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white.withValues(alpha: a), width: 26)));
   static Widget _dot(double d, double a) => Container(
-      width: d, height: d, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.gold.withValues(alpha: a)));
+      width: d, height: d, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.accent.withValues(alpha: a)));
 }
 
 /// Fades and slides its child up on first build; [index] staggers list items.
@@ -129,14 +130,14 @@ class AuthCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.pal.surface,
           borderRadius: BorderRadius.circular(30),
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .38), blurRadius: 50, offset: const Offset(0, 22))],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(30),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Container(height: 5, decoration: const BoxDecoration(gradient: AppColors.goldGradient)),
+            Container(height: 5, decoration: const BoxDecoration(gradient: AppColors.accentGradient)),
             Padding(padding: const EdgeInsets.all(24), child: child),
           ]),
         ),
@@ -163,7 +164,7 @@ class VideoBox extends StatelessWidget {
                   onTap: () => openVideo(context, videoId),
                   child: const Center(
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(Icons.play_circle_fill, color: AppColors.gold, size: 56),
+                      Icon(Icons.play_circle_fill, color: AppColors.accent, size: 56),
                       SizedBox(height: 6),
                       Text('Tap to play audio / video', style: TextStyle(color: Colors.white70, fontSize: 12)),
                     ]),

@@ -27,11 +27,13 @@ class Announcement {
   final int id, secondsLeft;
   final String title, body;
   final String? imageUrl;
+  final bool featured;
   Announcement.fromJson(Map<String, dynamic> j)
       : id = j['id'],
         title = j['title'] ?? '',
         body = j['body'] ?? '',
         imageUrl = j['imageUrl'],
+        featured = j['featured'] == true,
         secondsLeft = (j['secondsLeft'] ?? 0).toInt();
 }
 

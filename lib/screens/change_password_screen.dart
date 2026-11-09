@@ -61,8 +61,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                const Text('Other devices will be signed out after you change your password.',
-                    style: TextStyle(color: AppColors.muted)),
+                Text('Other devices will be signed out after you change your password.',
+                    style: TextStyle(color: context.pal.muted)),
                 const SizedBox(height: 18),
                 _field(_cur, 'Current password', _hideCur, () => setState(() => _hideCur = !_hideCur)),
                 const SizedBox(height: 14),
