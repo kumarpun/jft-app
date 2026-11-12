@@ -144,7 +144,7 @@ class _TakeTestScreenState extends State<TakeTestScreen> {
     final p = _paper;
     if (p == null) {
       return Scaffold(
-        appBar: AppBar(),
+        appBar: topBar(context, 'Test'),
         body: Center(
           child: _error == null
               ? const CircularProgressIndicator()

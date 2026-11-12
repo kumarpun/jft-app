@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/home_shell.dart';
 import 'screens/login_screen.dart';
 import 'state/auth_controller.dart';
+import 'state/screen_guard.dart';
 import 'state/theme_controller.dart';
 import 'theme/app_theme.dart';
 import 'widgets/ui.dart';
@@ -9,6 +10,7 @@ import 'widgets/ui.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   themeController.init();
+  ScreenGuard().init();
   runApp(const JftSenseiApp());
 }
 

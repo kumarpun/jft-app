@@ -55,6 +55,19 @@ class PackageTest {
   bool get isForm => formUrl != null && formUrl!.isNotEmpty && questionCount == 0;
 }
 
+class Opening {
+  final String label;
+  final DateTime date; // local midnight of the opening day
+  Opening(this.label, this.date);
+  static Opening? tryParse(Map<String, dynamic> j) {
+    final p = (j['date'] ?? '').toString().split('-');
+    if (p.length != 3) return null;
+    final y = int.tryParse(p[0]), m = int.tryParse(p[1]), d = int.tryParse(p[2]);
+    if (y == null || m == null || d == null) return null;
+    return Opening((j['label'] ?? '').toString(), DateTime(y, m, d));
+  }
+}
+
 class Package {
   final int id, days;
   final String name, description;
@@ -62,6 +75,7 @@ class Package {
   final double? originalPrice;
   final List<PackageTest> tests;
   final String? myStatus; // pending | active | null
+  final List<int> pendingIds; // purchase ids still awaiting admin approval
   /// Set for a grouped paid category: buying it requests a category-wide package.
   final String? category;
   /// Whole categories sold in this package: (sub-category name, set count).
@@ -77,6 +91,7 @@ class Package {
         originalPrice = j['originalPrice']?.toDouble(),
         tests = [for (final t in j['tests'] ?? []) PackageTest.fromJson(t)],
         myStatus = j['myStatus'],
+        pendingIds = [for (final i in j['pendingIds'] ?? []) (i as num).toInt()],
         category = j['category'],
         setCategories = [for (final c in j['setCategories'] ?? []) c.toString()],
         categories = [for (final c in j['categories'] ?? []) (c['name'] as String, (c['sets'] as num).toInt())];
@@ -187,4 +202,18 @@ class PurchaseRequest {
   final String status; // pending | active
   final String? whatsappUrl;
   PurchaseRequest(this.status, this.whatsappUrl);
+}
+
+class Notif {
+  final int id;
+  final String kind, title, body;
+  final bool read;
+  final DateTime? createdAt;
+  Notif.fromJson(Map<String, dynamic> j)
+      : id = j['id'],
+        kind = j['kind'] ?? '',
+        title = j['title'] ?? '',
+        body = j['body'] ?? '',
+        read = j['read'] == true,
+        createdAt = DateTime.tryParse('${j['createdAt']}')?.toLocal();
 }

@@ -17,7 +17,7 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My results')),
+      appBar: topBar(context, 'My results'),
       body: LoadView<ResultDetail>(
         load: () => auth.repo.result(id),
         builder: (c, r) {

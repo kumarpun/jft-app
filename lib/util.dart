@@ -12,11 +12,12 @@ String clock(int seconds) {
   return h > 0 ? '$h:${two(m)}:${two(s)}' : '${two(m)}:${two(s)}';
 }
 
-String timeLeft(int seconds) {
+String timeLeft(int seconds, {bool suffix = true}) {
+  final w = suffix ? ' remaining' : '';
   final d = seconds ~/ 86400, h = (seconds % 86400) ~/ 3600, m = (seconds % 3600) ~/ 60;
-  if (d > 0) return '${d}d ${h}h remaining';
-  if (h > 0) return '${h}h ${m}m remaining';
-  return '${m}m remaining';
+  if (d > 0) return '${d}d ${h}h$w';
+  if (h > 0) return '${h}h ${m}m$w';
+  return '${m}m$w';
 }
 
 String formatPrice(double v) => v == v.roundToDouble() ? '${v.toInt()}' : v.toStringAsFixed(2);

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/api_client.dart';
 import '../api/repository.dart';
@@ -50,8 +51,46 @@ class AuthController extends ChangeNotifier {
     await _store(t, u);
   }
 
+  /// Same value as GOOGLE_CLIENT_ID on the server (the Web OAuth client), so the ID token's audience matches.
+  static const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+  static const _googleIosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
+  static bool _googleReady = false;
+
+  /// Sign in / sign up with Google. Returns false if the user cancelled.
+  Future<bool> googleLogin() async {
+    if (_googleServerClientId.isEmpty) {
+      throw ApiException('Google sign-in is not configured in this build.');
+    }
+    final g = GoogleSignIn.instance;
+    if (!_googleReady) {
+      await g.initialize(
+        serverClientId: _googleServerClientId,
+        clientId: _googleIosClientId.isEmpty ? null : _googleIosClientId,
+      );
+      _googleReady = true;
+    }
+    final GoogleSignInAccount account;
+    try {
+      account = await g.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) return false;
+      throw ApiException('Google sign-in failed. Try again.');
+    }
+    final idToken = account.authentication.idToken;
+    if (idToken == null) throw ApiException('Google sign-in failed. Try again.');
+    final (t, u) = await repo.googleLogin(idToken);
+    await _store(t, u);
+    return true;
+  }
+
   Future<void> logout() async {
     await repo.logout();
+    await _clear();
+  }
+
+  /// Permanently deletes the account on the server, then signs out locally. Throws if the server refuses.
+  Future<void> deleteAccount() async {
+    await repo.deleteAccount();
     await _clear();
   }
 

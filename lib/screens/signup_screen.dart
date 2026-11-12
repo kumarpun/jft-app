@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../state/auth_controller.dart';
+import '../theme/app_theme.dart';
 import '../widgets/ui.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -11,7 +12,18 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _name = TextEditingController(), _email = TextEditingController(), _pw = TextEditingController();
-  bool _busy = false;
+  bool _busy = false, _hide = true, _gBusy = false;
+
+  Future<void> _google() async {
+    setState(() => _gBusy = true);
+    try {
+      if (await widget.auth.googleLogin() && mounted) Navigator.popUntil(context, (r) => r.isFirst);
+    } catch (e) {
+      if (mounted) toast(context, '$e', error: true);
+    } finally {
+      if (mounted) setState(() => _gBusy = false);
+    }
+  }
 
   Future<void> _submit() async {
     if (_name.text.trim().isEmpty || _email.text.trim().isEmpty || _pw.text.isEmpty) {
@@ -30,57 +42,34 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CrimsonBackdrop(
-        child: SafeArea(
-          child: Column(children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.maybePop(context)),
-            ),
-            Expanded(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                      const Center(child: BrandLogo(size: 72)),
-                      const SizedBox(height: 14),
-                      const Text('Create account',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white)),
-                      const SizedBox(height: 22),
-                      FadeSlide(child: AuthCard(
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                          TextField(
-                              controller: _name,
-                              textCapitalization: TextCapitalization.words,
-                              decoration: const InputDecoration(labelText: 'Full name', prefixIcon: Icon(Icons.person_outline))),
-                          const SizedBox(height: 14),
-                          TextField(
-                              controller: _email,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline))),
-                          const SizedBox(height: 14),
-                          TextField(
-                              controller: _pw,
-                              obscureText: true,
-                              onSubmitted: (_) => _submit(),
-                              decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline))),
-                          const SizedBox(height: 22),
-                          GradientButton(label: 'SIGN UP', busy: _busy, onPressed: _busy ? null : _submit),
-                        ]),
-                      )),
-                    ]),
-                  ),
-                ),
-              ),
-            ),
-          ]),
+    return AuthPage(
+      back: true,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        FadeSlide(child: BrandLogo(size: 64)),
+        const SizedBox(height: 28),
+        Text('Create account', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: context.pal.text)),
+        const SizedBox(height: 28),
+        AuthField(controller: _name, label: 'Full name', icon: Icons.person_outline_rounded, capitalization: TextCapitalization.words),
+        const SizedBox(height: 16),
+        AuthField(controller: _email, label: 'Email address', icon: Icons.mail_outline_rounded, keyboardType: TextInputType.emailAddress),
+        const SizedBox(height: 16),
+        AuthField(
+          controller: _pw,
+          label: 'Password',
+          icon: Icons.lock_outline_rounded,
+          obscure: _hide,
+          suffix: IconButton(
+              icon: Icon(_hide ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 19),
+              color: context.pal.muted,
+              onPressed: () => setState(() => _hide = !_hide)),
         ),
-      ),
+        const SizedBox(height: 36),
+        Align(alignment: Alignment.centerRight, child: AuthPillButton(label: 'Sign up', icon: Icons.arrow_forward_rounded, busy: _busy, onPressed: _busy ? null : _submit)),
+        const SizedBox(height: 32),
+        GoogleAuthButton(label: 'Sign up with Google', busy: _gBusy, onPressed: _google),
+        const SizedBox(height: 24),
+        AuthSwitchLink(text: 'Already have an account?', action: 'Sign In', onTap: () => Navigator.maybePop(context)),
+      ]),
     );
   }
 }

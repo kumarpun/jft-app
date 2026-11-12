@@ -14,7 +14,18 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _id = TextEditingController(), _pw = TextEditingController();
-  bool _busy = false, _hide = true;
+  bool _busy = false, _hide = true, _gBusy = false;
+
+  Future<void> _google() async {
+    setState(() => _gBusy = true);
+    try {
+      await widget.auth.googleLogin();
+    } catch (e) {
+      if (mounted) toast(context, '$e', error: true);
+    } finally {
+      if (mounted) setState(() => _gBusy = false);
+    }
+  }
 
   Future<void> _submit() async {
     if (_id.text.trim().isEmpty || _pw.text.isEmpty) return toast(context, 'Enter email and password', error: true);
@@ -30,80 +41,55 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CrimsonBackdrop(
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  const Center(child: FadeSlide(child: BrandLogo(size: 104))),
-                  const SizedBox(height: 18),
-                  const Text('JFT Sensei',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
-                  const SizedBox(height: 6),
-                  Text('Master JFT with confidence',
-                      textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withValues(alpha: .8), letterSpacing: .3)),
-                  const SizedBox(height: 28),
-                  FadeSlide(child: AuthCard(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                      Text('Welcome', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.pal.text)),
-                      const SizedBox(height: 4),
-                      Text('Sign in to continue', textAlign: TextAlign.center, style: TextStyle(color: context.pal.muted)),
-                      if (widget.auth.notice != null) ...[
-                        const SizedBox(height: 14),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: context.pal.primarySoft, borderRadius: BorderRadius.circular(12)),
-                          child: Text(widget.auth.notice!, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                        ),
-                      ],
-                      const SizedBox(height: 22),
-                      TextField(
-                          controller: _id,
-                          keyboardType: TextInputType.emailAddress,
-                          autofillHints: const [AutofillHints.email],
-                          decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline))),
-                      const SizedBox(height: 14),
-                      TextField(
-                        controller: _pw,
-                        obscureText: _hide,
-                        onSubmitted: (_) => _submit(),
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                              icon: Icon(_hide ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                              onPressed: () => setState(() => _hide = !_hide)),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => Navigator.push(
-                              context, MaterialPageRoute(builder: (_) => ForgotPasswordScreen(auth: widget.auth, email: _id.text.trim()))),
-                          child: const Text('Forgot password?', style: TextStyle(fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      GradientButton(label: 'SIGN IN', busy: _busy, onPressed: _busy ? null : _submit),
-                    ]),
-                  )),
-                  const SizedBox(height: 14),
-                  TextButton(
-                    style: TextButton.styleFrom(foregroundColor: Colors.white),
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SignupScreen(auth: widget.auth))),
-                    child: const Text("New here? Create an account", style: TextStyle(fontWeight: FontWeight.w600)),
-                  ),
-                ]),
-              ),
+    final primary = Theme.of(context).colorScheme.primary;
+    return AuthPage(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        FadeSlide(child: BrandLogo(size: 78)),
+        const SizedBox(height: 34),
+        Text('Login', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: context.pal.text)),
+        if (widget.auth.notice != null) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: context.pal.primarySoft, borderRadius: BorderRadius.circular(16)),
+            child: Text(widget.auth.notice!, style: TextStyle(color: primary)),
+          ),
+        ],
+        const SizedBox(height: 28),
+        AuthField(controller: _id, label: 'Email address', icon: Icons.mail_outline_rounded, keyboardType: TextInputType.emailAddress, autofillHints: const [AutofillHints.email]),
+        const SizedBox(height: 16),
+        AuthField(
+          controller: _pw,
+          label: 'Password',
+          icon: Icons.lock_outline_rounded,
+          obscure: _hide,
+          suffix: IconButton(
+              icon: Icon(_hide ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 19),
+              color: context.pal.muted,
+              onPressed: () => setState(() => _hide = !_hide)),
+        ),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ForgotPasswordScreen(auth: widget.auth, email: _id.text.trim()))),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 6, top: 2, bottom: 2),
+              child: Text('Forgot Password?', style: TextStyle(color: primary, fontSize: 13.5, fontWeight: FontWeight.w700)),
             ),
           ),
         ),
-      ),
+        const SizedBox(height: 32),
+        Align(alignment: Alignment.centerRight, child: AuthPillButton(label: 'Login', busy: _busy, onPressed: _busy ? null : _submit)),
+        const SizedBox(height: 32),
+        GoogleAuthButton(busy: _gBusy, onPressed: _google),
+        const SizedBox(height: 24),
+        AuthSwitchLink(
+          text: "Don't have an account?",
+          action: 'Sign Up',
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SignupScreen(auth: widget.auth))),
+        ),
+      ]),
     );
   }
 }

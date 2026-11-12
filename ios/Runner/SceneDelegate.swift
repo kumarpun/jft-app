@@ -3,6 +3,8 @@ import UIKit
 
 class SceneDelegate: FlutterSceneDelegate {
   private var cover: UIView?
+  // Mirrors the admin switch; stays true until the server says screenshots are allowed.
+  private var protect = true
 
   override func scene(
     _ scene: UIScene,
@@ -19,10 +21,22 @@ class SceneDelegate: FlutterSceneDelegate {
     NotificationCenter.default.addObserver(
       self, selector: #selector(updateCover), name: UIApplication.didBecomeActiveNotification, object: nil)
     updateCover()
+    if let controller = window?.rootViewController as? FlutterViewController {
+      FlutterMethodChannel(name: "jftsensei/secure", binaryMessenger: controller.binaryMessenger)
+        .setMethodCallHandler { [weak self] call, result in
+          if call.method == "setSecure" {
+            self?.protect = (call.arguments as? Bool) ?? true
+            self?.updateCover()
+            result(nil)
+          } else {
+            result(FlutterMethodNotImplemented)
+          }
+        }
+    }
   }
 
   @objc private func updateCover() {
-    let shouldCover = UIScreen.main.isCaptured || UIApplication.shared.applicationState != .active
+    let shouldCover = protect && (UIScreen.main.isCaptured || UIApplication.shared.applicationState != .active)
     guard let window = self.window else { return }
     if shouldCover {
       if cover == nil {

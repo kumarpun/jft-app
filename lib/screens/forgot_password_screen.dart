@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../state/auth_controller.dart';
+import '../theme/app_theme.dart';
 import '../widgets/ui.dart';
 
 /// Requests a reset email. The emailed link opens the web reset page.
@@ -38,62 +39,32 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CrimsonBackdrop(
-        child: SafeArea(
-          child: Column(children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.maybePop(context)),
-            ),
-            Expanded(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                      const Center(child: BrandLogo(size: 72)),
-                      const SizedBox(height: 14),
-                      const Text('Forgot password',
-                          textAlign: TextAlign.center, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white)),
-                      const SizedBox(height: 22),
-                      FadeSlide(
-                        child: AuthCard(
-                          child: _sent != null
-                              ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                                  const Icon(Icons.mark_email_read_outlined, size: 48),
-                                  const SizedBox(height: 12),
-                                  Text(_sent!, textAlign: TextAlign.center),
-                                  const SizedBox(height: 8),
-                                  const Text('Open the link in the email to choose a new password, then sign in here.',
-                                      textAlign: TextAlign.center),
-                                  const SizedBox(height: 20),
-                                  GradientButton(label: 'BACK TO SIGN IN', onPressed: () => Navigator.maybePop(context)),
-                                ])
-                              : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                                  const Text("Enter your account email and we'll send you a reset link."),
-                                  const SizedBox(height: 18),
-                                  TextField(
-                                    controller: _email,
-                                    keyboardType: TextInputType.emailAddress,
-                                    autofillHints: const [AutofillHints.email],
-                                    onSubmitted: (_) => _submit(),
-                                    decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline)),
-                                  ),
-                                  const SizedBox(height: 22),
-                                  GradientButton(label: 'SEND RESET LINK', busy: _busy, onPressed: _busy ? null : _submit),
-                                ]),
-                        ),
-                      ),
-                    ]),
-                  ),
-                ),
-              ),
-            ),
-          ]),
-        ),
-      ),
+    final primary = Theme.of(context).colorScheme.primary;
+    return AuthPage(
+      back: true,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        FadeSlide(child: BrandLogo(size: 64)),
+        const SizedBox(height: 28),
+        if (_sent != null) ...[
+          Icon(Icons.mark_email_read_outlined, size: 44, color: primary),
+          const SizedBox(height: 14),
+          Text('Check your email', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: context.pal.text)),
+          const SizedBox(height: 10),
+          Text(_sent!, style: TextStyle(color: context.pal.text, fontSize: 14.5, height: 1.4)),
+          const SizedBox(height: 8),
+          Text('Open the link in the email to choose a new password, then sign in here.', style: TextStyle(color: context.pal.muted, fontSize: 14, height: 1.4)),
+          const SizedBox(height: 36),
+          Align(alignment: Alignment.centerRight, child: AuthPillButton(label: 'Back to login', icon: Icons.arrow_back_rounded, onPressed: () => Navigator.maybePop(context))),
+        ] else ...[
+          Text('Forgot password', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: context.pal.text)),
+          const SizedBox(height: 10),
+          Text("Enter your account email and we'll send you a reset link.", style: TextStyle(color: context.pal.muted, fontSize: 14, height: 1.4)),
+          const SizedBox(height: 28),
+          AuthField(controller: _email, label: 'Email address', icon: Icons.mail_outline_rounded, keyboardType: TextInputType.emailAddress, autofillHints: const [AutofillHints.email]),
+          const SizedBox(height: 36),
+          Align(alignment: Alignment.centerRight, child: AuthPillButton(label: 'Send link', icon: Icons.send_rounded, busy: _busy, onPressed: _busy ? null : _submit)),
+        ],
+      ]),
     );
   }
 }

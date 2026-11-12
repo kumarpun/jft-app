@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../theme/app_theme.dart';
 import '../util.dart';
+import '../widgets/ui.dart';
 
 /// Shows a Google Form inside the app (WebView) under the app's branded header.
 class FormScreen extends StatefulWidget {
@@ -76,36 +77,15 @@ class _FormScreenState extends State<FormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(children: [
-        Container(
-          decoration: const BoxDecoration(
-            gradient: AppColors.brandGradient,
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-          ),
-          child: SafeArea(
-            bottom: false,
-            child: SizedBox(
-              height: 64,
-              child: Row(children: [
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  tooltip: 'Close',
-                  onPressed: () => Navigator.pop(context),
-                ),
-                Expanded(
-                  child: Text(widget.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800)),
-                ),
-                Text(clock(_countUp ? _elapsed : (_left < 0 ? 0 : _left)),
-                    style: TextStyle(
-                        color: !_countUp && _left <= 60 ? AppColors.accent : Colors.white, fontSize: 17, fontWeight: FontWeight.w800)),
-                IconButton(icon: const Icon(Icons.refresh, color: Colors.white), tooltip: 'Reload', onPressed: _reload),
-              ]),
-            ),
-          ),
+      appBar: topBar(context, widget.title, actions: [
+        Center(
+          child: Text(clock(_countUp ? _elapsed : (_left < 0 ? 0 : _left)),
+              style: TextStyle(color: !_countUp && _left <= 60 ? AppColors.danger : context.pal.text, fontSize: 17, fontWeight: FontWeight.w800)),
         ),
+        IconButton(icon: Icon(Icons.refresh, color: context.pal.text), tooltip: 'Reload', onPressed: _reload),
+        const SizedBox(width: 4),
+      ]),
+      body: Column(children: [
         if (_progress < 100 && _error == null) LinearProgressIndicator(value: _progress / 100, minHeight: 3),
         Expanded(
           child: _error != null

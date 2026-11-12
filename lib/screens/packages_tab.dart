@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../api/api_client.dart';
 import '../models.dart';
 import '../state/auth_controller.dart';
 import '../theme/app_theme.dart';
@@ -89,64 +90,151 @@ class PackagesTab extends StatelessWidget {
     }
   }
 
+  Future<void> _cancel(BuildContext c, Package p) async {
+    final ok = await showDialog<bool>(
+      context: c,
+      builder: (d) => AlertDialog(
+        title: const Text('Cancel request?'),
+        content: Text('Your request for ${p.name} will be withdrawn.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Keep')),
+          TextButton(onPressed: () => Navigator.pop(d, true), child: const Text('Cancel request')),
+        ],
+      ),
+    );
+    if (ok != true || !c.mounted) return;
+    try {
+      var ids = p.pendingIds;
+      if (ids.isEmpty) {
+        // older server: find the pending purchase(s) for this package ourselves
+        final mine = await auth.repo.myPackages();
+        final tids = {for (final t in p.tests) t.id};
+        ids = [for (final m in mine) if (m.status == 'pending' && (m.packageId == p.id || m.tests.any((t) => tids.contains(t.id)))) m.id];
+      }
+      if (ids.isEmpty) throw ApiException('No pending request found.');
+      for (final id in ids) {
+        await auth.repo.cancelRequest(id);
+      }
+      if (c.mounted) toast(c, 'Request cancelled');
+      onChanged();
+    } catch (e) {
+      if (c.mounted) toast(c, '$e', error: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return LoadView<List<Package>>(
       load: auth.repo.packages,
       isEmpty: (l) => l.isEmpty,
       emptyText: 'No packages on sale right now.',
-      builder: (c, list) => ListView.separated(
-        padding: const EdgeInsets.all(16),
+      builder: (c, all) => _Filtered(
+        all: all,
+        labelOf: (p) {
+          final n = _names(p);
+          return n.isEmpty ? p.name : n.join(', ');
+        },
+        builder: (c, list) => ListView.separated(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
         itemCount: list.length,
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (c, i) {
-          final p = list[i];
+          final sorted = [...list.where((x) => x.myStatus != 'active'), ...list.where((x) => x.myStatus == 'active')];
+          final p = sorted[i];
           final status = p.myStatus;
           final names = _names(p);
           return SetCard(
             heading: names.isEmpty ? p.name : names.join(', '),
+            days: p.days,
+            tint: status == 'active' ? AppColors.ok : null,
             topRight: Row(mainAxisSize: MainAxisSize.min, children: [
               if (p.originalPrice != null && p.originalPrice! > p.price) ...[
-                Text('रु ${_num(p.originalPrice!)}', style: TextStyle(color: context.pal.muted, fontSize: 12, decoration: TextDecoration.lineThrough)),
+                Text('रु ${_num(p.originalPrice!)}', style: TextStyle(color: context.pal.muted, fontSize: 10.5, decoration: TextDecoration.lineThrough)),
                 const SizedBox(width: 5),
               ],
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                decoration: BoxDecoration(gradient: AppColors.accentGradient, borderRadius: BorderRadius.circular(10)),
-                child: Text('रु ${_num(p.price)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Color(0xFF0B1B3F))),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFFFFE08A), Color(0xFFF5B83D)]), borderRadius: BorderRadius.circular(10)),
+                child: Text('रु ${_num(p.price)}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Color(0xFF3D2A00))),
               ),
-              const SizedBox(width: 10),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  minimumSize: const Size(0, 32),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ]),
+            footer: Row(children: [
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    disabledBackgroundColor: status == 'active' ? AppColors.ok.withValues(alpha: .14) : context.pal.primarySoft,
+                    disabledForegroundColor: status == 'active' ? AppColors.ok : Theme.of(c).colorScheme.primary,
+                    elevation: 0,
+                    minimumSize: const Size(0, 40),
+                    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                  ),
+                  onPressed: status == null ? () => _buy(c, p) : null,
+                  child: status == 'active'
+                      ? const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.check_circle_rounded, size: 18), SizedBox(width: 6), Text('Purchased')])
+                      : status == 'pending'
+                          ? const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.schedule_rounded, size: 17), SizedBox(width: 6), Text('Requested')])
+                          : const Text('Buy Now'),
                 ),
-                onPressed: status == null ? () => _buy(c, p) : null,
-                child: Text(status == null ? 'Buy Now' : (status == 'active' ? 'Active' : 'Requested')),
               ),
+              if (status == 'pending') ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.danger,
+                      side: BorderSide(color: AppColors.danger.withValues(alpha: .5)),
+                      minimumSize: const Size(0, 40),
+                      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                    ),
+                    onPressed: () => _cancel(c, p),
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                    label: const Text('Cancel request'),
+                  ),
+                ),
+              ],
             ]),
-            extra: Row(mainAxisSize: MainAxisSize.min, children: [
-              if (names.isNotEmpty)
-                Text('${p.name} · ', style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w600, fontSize: 13)),
-              Icon(Icons.timer_outlined, size: 15, color: context.pal.muted),
-              const SizedBox(width: 4),
-              Text('${p.days} days remaining', style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w600, fontSize: 13)),
-            ]),
+            extra: names.isEmpty ? null : Text(p.name, style: TextStyle(color: context.pal.muted, fontWeight: FontWeight.w600, fontSize: 11.5)),
             rows: [
               for (final t in p.tests)
                 SetRowData(
                   title: t.title,
-                  meta: [if (t.folder != null) '📁 ${t.folder}', if (!t.isForm) '${t.questionCount} questions', if (t.durationSeconds > 0) formatDuration(t.durationSeconds)].join(' · '),
+                  group: t.folder,
+                    meta: [if (!t.isForm) '${t.questionCount} questions', if (t.durationSeconds > 0) formatDuration(t.durationSeconds)].join(' · '),
                   trailing: Pill('🔒 Premium'),
                 ),
             ],
           );
         },
-      ),
+      )),
     );
   }
+}
+
+/// "Search category" field above a list of packages; [builder] gets the filtered list.
+class _Filtered extends StatefulWidget {
+  final List<Package> all;
+  final String Function(Package) labelOf;
+  final Widget Function(BuildContext, List<Package>) builder;
+  const _Filtered({required this.all, required this.labelOf, required this.builder});
+  @override
+  State<_Filtered> createState() => _FilteredState();
+}
+
+class _FilteredState extends State<_Filtered> {
+  @override
+  Widget build(BuildContext context) => SearchHost(
+      options: {for (final p in widget.all) widget.labelOf(p)}.toList(),
+      builder: (c, q, sel, box) {
+        final shown = widget.all
+            .where((p) => (sel == null || widget.labelOf(p) == sel) && (q.isEmpty || widget.labelOf(p).toLowerCase().contains(q) || p.name.toLowerCase().contains(q)))
+            .toList();
+        return Column(children: [
+          Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 8), child: box),
+          Expanded(child: shown.isEmpty ? Center(child: Text('No matching category.', style: TextStyle(color: context.pal.muted))) : widget.builder(c, shown)),
+        ]);
+      });
 }
 
 String _num(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);

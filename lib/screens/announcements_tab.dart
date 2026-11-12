@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models.dart';
 import '../state/auth_controller.dart';
 import '../theme/app_theme.dart';
-import '../util.dart';
 import '../widgets/load_view.dart';
 import '../widgets/net_image.dart';
 import '../widgets/ui.dart';
@@ -14,7 +13,7 @@ class AnnouncementsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LoadView<List<Announcement>>(
-      load: auth.repo.announcements,
+      load: () async => (await auth.repo.announcements()).where((a) => !a.featured).toList(),
       isEmpty: (l) => l.isEmpty,
       emptyText: 'No announcements.',
       builder: (c, list) => ListView.separated(
@@ -31,10 +30,7 @@ class AnnouncementsTab extends StatelessWidget {
                 NetImage(api: auth.api, url: a.imageUrl),
                 Row(children: [
                   Expanded(child: Text(a.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
-                  if (a.featured)
-                    const Pill('★ Featured', color: Colors.white, bg: Color(0xFF3D6BEA))
-                  else
-                    Pill(timeLeft(a.secondsLeft), icon: Icons.timer_outlined),
+                  if (a.secondsLeft >= 60) LiveLeft(seconds: a.secondsLeft, builder: (l) => Pill(l, icon: Icons.timer_outlined)),
                 ]),
                 if (a.body.isNotEmpty) ...[const SizedBox(height: 8), Text(a.body)],
               ]),

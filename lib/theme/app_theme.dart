@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 
 /// Theme-sensitive colours. Read with `context.pal`.
@@ -19,7 +20,7 @@ class Pal extends ThemeExtension<Pal> {
   });
 
   static const light = Pal(
-    bg: Color(0xFFF2F5FA), // cool mist
+    bg: Colors.white,
     surface: Colors.white,
     surface2: Color(0xFFEAF0FA),
     text: Color(0xFF0B1B3F),
@@ -142,6 +143,11 @@ ThemeData buildTheme([Brightness brightness = Brightness.light]) {
       elevation: 0,
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: dark ? Brightness.dark : Brightness.light,
+      ),
       titleTextStyle: TextStyle(color: p.text, fontSize: 19, fontWeight: FontWeight.w800, letterSpacing: .2),
     ),
     cardTheme: CardThemeData(
@@ -167,7 +173,7 @@ ThemeData buildTheme([Brightness brightness = Brightness.light]) {
         foregroundColor: Colors.white,
         minimumSize: const Size.fromHeight(52),
         textStyle: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, letterSpacing: .3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -175,7 +181,7 @@ ThemeData buildTheme([Brightness brightness = Brightness.light]) {
         foregroundColor: accent,
         side: BorderSide(color: accent),
         minimumSize: const Size(0, 46),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: accent)),
@@ -197,7 +203,7 @@ ThemeData buildTheme([Brightness brightness = Brightness.light]) {
       iconTheme: WidgetStateProperty.resolveWith((s) =>
           IconThemeData(color: s.contains(WidgetState.selected) ? Colors.white : p.muted, size: 24)),
       labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
-            fontSize: 11.5,
+            fontSize: 10.5,
             fontWeight: s.contains(WidgetState.selected) ? FontWeight.w800 : FontWeight.w500,
             color: s.contains(WidgetState.selected) ? p.text : p.muted,
           )),
