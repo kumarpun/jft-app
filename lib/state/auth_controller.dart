@@ -52,7 +52,7 @@ class AuthController extends ChangeNotifier {
   }
 
   /// Same value as GOOGLE_CLIENT_ID on the server (the Web OAuth client), so the ID token's audience matches.
-  static const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+  static const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID', defaultValue: '168648579439-097s59m8nuqic149n9fek54ae2cdqbr4.apps.googleusercontent.com');
   static const _googleIosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
   static bool _googleReady = false;
 

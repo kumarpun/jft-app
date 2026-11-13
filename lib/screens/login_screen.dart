@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../state/auth_controller.dart';
 import '../theme/app_theme.dart';
@@ -15,6 +16,25 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _id = TextEditingController(), _pw = TextEditingController();
   bool _busy = false, _hide = true, _gBusy = false;
+  Timer? _noticeTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Forced-logout notice disappears after 7 seconds.
+    if (widget.auth.notice != null) {
+      _noticeTimer = Timer(const Duration(seconds: 7), () {
+        widget.auth.notice = null;
+        if (mounted) setState(() {});
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _noticeTimer?.cancel();
+    super.dispose();
+  }
 
   Future<void> _google() async {
     setState(() => _gBusy = true);

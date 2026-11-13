@@ -125,9 +125,10 @@ class PackagesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LoadView<List<Package>>(
-      load: auth.repo.packages,
+      // Purchased (active) packages live under My Packages; only show what can still be bought here.
+      load: () async => [for (final p in await auth.repo.packages()) if (p.myStatus != 'active') p],
       isEmpty: (l) => l.isEmpty,
-      emptyText: 'No packages on sale right now.',
+      emptyText: 'No packages to buy right now. Your purchased packages are under My Packages.',
       builder: (c, all) => _Filtered(
         all: all,
         labelOf: (p) {
@@ -149,7 +150,7 @@ class PackagesTab extends StatelessWidget {
             tint: status == 'active' ? AppColors.ok : null,
             topRight: Row(mainAxisSize: MainAxisSize.min, children: [
               if (p.originalPrice != null && p.originalPrice! > p.price) ...[
-                Text('रु ${_num(p.originalPrice!)}', style: TextStyle(color: context.pal.muted, fontSize: 10.5, decoration: TextDecoration.lineThrough)),
+                Text('रु ${_num(p.originalPrice!)}', style: TextStyle(color: context.pal.muted, fontSize: 12, fontWeight: FontWeight.w900, decoration: TextDecoration.lineThrough, decorationThickness: 2)),
                 const SizedBox(width: 5),
               ],
               Container(

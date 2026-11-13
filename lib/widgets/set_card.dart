@@ -21,7 +21,7 @@ class SetCard extends StatefulWidget {
   final Color? tint; // highlight colour (e.g. green for purchased)
   final int? days; // shown in the pill as "N sets · D days"
   final double headingSize, pad;
-  const SetCard({super.key, required this.heading, required this.rows, this.topRight, this.extra, this.footer, this.emptyText = '', this.count, this.days, this.tint, this.headingSize = 24, this.pad = 12});
+  const SetCard({super.key, required this.heading, required this.rows, this.topRight, this.extra, this.footer, this.emptyText = '', this.count, this.days, this.tint, this.headingSize = 18, this.pad = 12});
   @override
   State<SetCard> createState() => _SetCardState();
 }
@@ -30,6 +30,7 @@ class _SetCardState extends State<SetCard> {
   static const _pageSize = 10; // rows loaded per page
   static const _viewHeight = 250.0; // about 5 rows visible, the rest scroll
   bool _open = false;
+  final _openFolders = <String>{}; // folders start collapsed; tap header to expand
   int _visible = _pageSize;
   final _scroll = ScrollController();
   ScrollableState? _outer; // the page list; takes over once the inner list hits an edge
@@ -147,26 +148,48 @@ class _SetCardState extends State<SetCard> {
       );
 
   // Rows grouped by folder (first-appearance order); ungrouped rows come first, numbering restarts per group.
+  // Folders are collapsible (collapsed by default); only expanded folders list rows.
   List<Widget> _grouped() {
     final groups = <String?, List<SetRowData>>{};
-    for (final r in widget.rows.take(_visible)) {
+    for (final r in widget.rows) {
       groups.putIfAbsent((r.group ?? '').isEmpty ? null : r.group, () => []).add(r);
     }
     final keys = [...groups.keys.where((k) => k == null), ...groups.keys.where((k) => k != null)];
     return [
       for (final k in keys) ...[
-        if (k != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8, left: 2),
-            child: Row(children: [
-              Icon(Icons.folder_rounded, size: 14, color: context.pal.muted),
-              const SizedBox(width: 6),
-              Flexible(child: Text(k, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .3, color: context.pal.muted))),
-            ]),
-          ),
-        for (var i = 0; i < groups[k]!.length; i++) _row(i, groups[k]![i]),
+        if (k != null) _folderHeader(k, groups[k]!.length),
+        if (k == null || _openFolders.contains(k))
+          for (var i = 0; i < groups[k]!.take(_visible).length; i++) _row(i, groups[k]![i]),
       ],
     ];
+  }
+
+  Widget _folderHeader(String name, int count) {
+    final open = _openFolders.contains(name);
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => setState(() => open ? _openFolders.remove(name) : _openFolders.add(name)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+          child: Row(children: [
+            Icon(open ? Icons.folder_open_rounded : Icons.folder_rounded, size: 18, color: context.pal.muted),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(text: name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: .3, color: context.pal.text)),
+                  TextSpan(text: '  ($count)', style: TextStyle(fontSize: 11, color: context.pal.muted)),
+                ]),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(open ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, size: 20, color: context.pal.muted),
+          ]),
+        ),
+      ),
+    );
   }
 
   Widget _row(int i, SetRowData r) => Padding(
